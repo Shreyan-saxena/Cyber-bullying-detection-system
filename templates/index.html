@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment AI | Analysis</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1e;
+            --card-bg: #25252b;
+            --accent-blue: #3d8bff;
+            --text-main: #e0e0e0;
+            --text-dim: #a0a0a0;
+            --positive: #00c853;
+            --negative: #ff5252;
+            --neutral: #2196f3;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(61, 139, 255, 0.15) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, rgba(147, 51, 234, 0.1) 0, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            width: 100%;
+            max-width: 600px;
+            transition: transform 0.3s ease;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #fff, #a0a0a0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        textarea {
+            width: 100%;
+            height: 160px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            color: white;
+            font-size: 16px;
+            resize: none;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 15px rgba(61, 139, 255, 0.2);
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 24px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(61, 139, 255, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            background: #4a95ff;
+            box-shadow: 0 6px 20px rgba(61, 139, 255, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #444;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        #result-container {
+            margin-top: 32px;
+            padding: 24px;
+            border-radius: 16px;
+            display: none;
+            animation: slideUp 0.5s ease-out;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .positive { background: rgba(0, 200, 83, 0.1); border-color: rgba(0, 200, 83, 0.3) !important; }
+        .negative { background: rgba(255, 82, 82, 0.1); border-color: rgba(255, 82, 82, 0.3) !important; }
+        .neutral { background: rgba(33, 150, 243, 0.1); border-color: rgba(33, 150, 243, 0.3) !important; }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .result-title {
+            font-weight: 700;
+            font-size: 22px;
+            letter-spacing: -0.5px;
+        }
+
+        #reasoningText {
+            font-size: 1.05rem;
+            line-height: 1.5;
+            color: var(--text-main);
+            margin-bottom: 16px;
+        }
+
+        .details {
+            font-size: 12px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 800;
+        }
+
+        .badge-positive { background: var(--positive); color: #000; }
+        .badge-negative { background: var(--negative); color: #fff; }
+        .badge-neutral { background: var(--neutral); color: #fff; }
+
+        .loader {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top: 3px solid var(--accent-blue);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: none;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        ::placeholder { color: #555; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Sentiment AI</h1>
+    <p class="subtitle">Enter your text for a deep neural sentiment analysis</p>
+    
+    <textarea id="textInput" placeholder="How are you feeling about the world today?"></textarea>
+    
+    <button id="analyzeBtn">Analyze Neural Flow</button>
+    <div id="loader" class="loader"></div>
+
+    <div id="result-container">
+        <div class="result-header">
+            <div class="result-title"><span id="verdictText"></span></div>
+            <div id="verdictBadge" class="badge"></div>
+        </div>
+        <div id="reasoningText"></div>
+        <div class="details">
+            <span>Confidence: <span id="confidenceValue"></span>%</span>
+            <span>Engine: Llama 3.3 70B</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const textInput = document.getElementById('textInput');
+    const resultContainer = document.getElementById('result-container');
+    const loader = document.getElementById('loader');
+
+    analyzeBtn.addEventListener('click', async () => {
+        const text = textInput.value.trim();
+        if (!text) return;
+
+        analyzeBtn.disabled = true;
+        loader.style.display = 'block';
+        resultContainer.style.display = 'none';
+
+        try {
+            const response = await fetch('/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text })
+            });
+            
+            const data = await response.json();
+            if (response.ok) displayResult(data);
+            else alert(data.error);
+        } catch (err) {
+            alert("Connection error.");
+        } finally {
+            analyzeBtn.disabled = false;
+            loader.style.display = 'none';
+        }
+    });
+
+    function displayResult(data) {
+        const verdict = data.verdict;
+        const confidence = data.confidence * 100;
+
+        document.getElementById('verdictText').textContent = verdict.toUpperCase();
+        document.getElementById('reasoningText').textContent = data.reasoning;
+        document.getElementById('confidenceValue').textContent = confidence.toFixed(0);
+        
+        resultContainer.className = '';
+        resultContainer.classList.add(verdict);
+        resultContainer.style.display = 'block';
+
+        const badge = document.getElementById('verdictBadge');
+        badge.className = 'badge';
+        badge.classList.add('badge-' + verdict);
+        badge.textContent = verdict;
+    }
+</script>
+
+</body>
+</html>
