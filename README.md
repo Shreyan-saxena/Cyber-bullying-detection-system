@@ -223,3 +223,10 @@ Contributions are welcome! If you'd like to improve the system:
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
 4. Push to the branch (`git push origin feature/AmazingFeature`).
 5. Open a Pull Request.
+
+---
+
+📄 License
+Open source - use freely for academic and educational purposes.
+
+
